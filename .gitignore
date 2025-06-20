@@ -3,3 +3,6 @@
 .upload.swp
 .vscode/
 packages/
+
+.cache/
+compile_commands.json

@@ -1,7 +1,9 @@
 @import Foundation;
 @import MediaPlayer;
 
+#import "Headers/YTICommand.h"
 #import "Headers/YTQueueItem.h"
+#import "Utils/LyricsParser.h"
 
 #define TAG "YTMusicUltimate+NowPlayingCenter : "
 
@@ -30,7 +32,37 @@ static BOOL YTMU(NSString *key) {
 
 @end
 
+@interface YTIKeyValuePair : NSObject
+@property (nonatomic, copy) NSString *key;
+@property (nonatomic, copy) NSString *value;
+@end
+
+@interface YTIServiceTrackingParams : NSObject
+- (NSArray<YTIKeyValuePair *> *)paramsArray;
+@end
+
+@interface YTIResponseContext : NSObject
+- (NSArray<YTIServiceTrackingParams *> *)serviceTrackingParamsArray;
+@end
+
+@interface YTIBrowseResponse : NSObject
+- (YTIResponseContext *)responseContext;
+@end
+
+@interface YTITabRenderer : NSObject
+- (YTICommand *)endpoint;
+@end
+
+@interface YTIRenderer : NSObject
+- (NSString *)videoId;
+@end
+
+@interface YTIWatchNextTabbedResultsRenderer : NSObject
+@property (retain, nonatomic) YTIRenderer *videoMetadata;
+@end
+
 static YTQueueController *gQueueController = nil;
+static NSString *gNowPlayingBrowseId = nil;
 
 %hook YTQueueController
 
@@ -51,8 +83,59 @@ static YTQueueController *gQueueController = nil;
 %new
 - (void)ytmu_nowPlayingItemChanged {
 #if DEBUG
-    NSLog(@TAG "Now playing track : %@ <%@>", [self.nowPlayingMusicQueueItem.videoRenderer.title stringWithFormattingRemoved], self.nowPlayingMusicQueueItem.localID);
+    NSLog(@TAG "Now playing track : %@ <%@>", [self.nowPlayingMusicQueueItem.videoRenderer.title stringWithFormattingRemoved], self.nowPlayingMusicQueueItem.videoRenderer.videoId);
 #endif
+}
+
+%end
+
+%hook YTMPlayerTabViewController
+
+- (void)updateTabs:(NSArray<YTITabRenderer *> *)tabs {
+    %orig(tabs);
+    NSAssert([NSThread isMainThread], @"updateTabs should be called on the main thread");
+#if DEBUG
+    NSLog(@TAG "YTMPlayerTabViewController updated tabs : %@", tabs);
+#endif
+    if (tabs.count == 3) {
+        YTITabRenderer *lyricsTab = tabs[1];
+        NSString *currentBrowseId = lyricsTab.endpoint.browseEndpoint.browseId;
+        gNowPlayingBrowseId = currentBrowseId;
+#if DEBUG
+        NSLog(@TAG "Current browse_id : %@", currentBrowseId);
+#endif
+    }
+}
+
+%end
+
+%hook YTIBrowseResponse
+
+- (instancetype)initWithData:(NSData *)data extensionRegistry:(id)arg2 error:(NSError **)error {
+    YTIBrowseResponse *response = %orig;
+#if DEBUG
+    NSLog(@TAG "YTIBrowseResponse initialized with data : <%lu bytes>", (unsigned long)data.length);
+#endif
+    LyricsParser *parser = [[LyricsParser alloc] initWithData:data];
+    Lyrics *lyrics = [parser parseLyrics];
+    if (lyrics) {
+        YTIResponseContext *context = [response responseContext];
+        NSArray<YTIServiceTrackingParams *> *trackingParams = [context serviceTrackingParamsArray];
+        NSString *browseId = nil;
+        for (YTIServiceTrackingParams *params in trackingParams) {
+            for (YTIKeyValuePair *pair in [params paramsArray]) {
+                if ([pair.key isEqualToString:@"browse_id"]) {
+                    browseId = pair.value;
+                    break;
+                }
+            }
+            if (browseId) break;
+        }
+#if DEBUG
+        NSLog(@TAG "Parsed lyrics : %@ <%lu lines> browse_id %@", lyrics, (unsigned long)lyrics.lines.count, browseId);
+#endif
+    }
+    return response;
 }
 
 %end
