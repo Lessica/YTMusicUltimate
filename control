@@ -3,7 +3,7 @@ Name: YTMusicUltimate
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: YouTube Music Premium
-Maintainer: dayanch96 & ginsu
+Maintainer: Lessica <82flex@gmail.com>
 Author: dayanch96 & ginsu
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000)

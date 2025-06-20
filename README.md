@@ -1,11 +1,10 @@
 # YTMusicUltimate (Lessica Fork)
 
-This is a maintained fork of [YTMusicUltimate](https://github.com/dayanch96/YTMusicUltimate).
+This is another maintained fork of [YTMusicUltimate](https://github.com/dayanch96/YTMusicUltimate).
 
 ## Additional Features
 
 - Send lyrics to Media Controls
-- [RootHide](https://github.com/roothide/Dopamine2-roothide) support
 - [TrollFools](https://github.com/Lessica/TrollFools) support
 
 ## Use it with Letterpress!
