@@ -20,6 +20,9 @@
 "PLAYBACK_RATE_BUTTON_DESC" = "调整播放速度";
 "SELECTABLE_LYRICS" = "复制歌词";
 "SELECTABLE_LYRICS_DESC" = "允许复制歌词功能";
+"SEND_LYRICS_TO_MEDIA_CONTROLS" = "将歌词发送到媒体控制";
+"SEND_LYRICS_TO_MEDIA_CONTROLS_DESC" = "在媒体控制视图中显示歌词。这对于希望在控制中心或锁屏上查看歌词的人非常有用。如果你需要将实时歌词悬浮在屏幕上，请购买使用「活字印刷术」插件。";
+"PURCHASE_LETTERPRESS" = "购买「活字印刷术」";
 "VOLBAR" = "音量控制";
 "VOLBAR_DESC" = "在播放器中添加音量控制条";
 "NO_AUTORADIO" = "关闭电台功能";

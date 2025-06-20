@@ -20,6 +20,9 @@
 "PLAYBACK_RATE_BUTTON_DESC" = "Adjust playback speed";
 "SELECTABLE_LYRICS" = "Lyrics text selection";
 "SELECTABLE_LYRICS_DESC" = "Enables text selection for lyrics";
+"SEND_LYRICS_TO_MEDIA_CONTROLS" = "Send lyrics to media controls";
+"SEND_LYRICS_TO_MEDIA_CONTROLS_DESC" = "Shows lyrics in the media controls view. This is useful for those who want to see lyrics in the control center or lock screen. If you need to have live lyrics floating on the screen, please purchase the tweak “Letterpress”.";
+"PURCHASE_LETTERPRESS" = "Purchase “Letterpress”";
 "VOLBAR" = "Volume bar";
 "VOLBAR_DESC" = "Adds a volume bar to the player";
 "NO_AUTORADIO" = "Disable radio";

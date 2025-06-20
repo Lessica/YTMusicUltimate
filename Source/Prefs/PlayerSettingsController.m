@@ -26,26 +26,30 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 4;
+    return 5;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (section == 0) {
         return 7;
-    } if (section == 2) {
-        return 3;
-    } if (section == 3) {
+    } else if (section == 1) {
         return 2;
-    } else {
+    } else if (section == 2) {
         return 1;
+    } else if (section == 3) {
+        return 3;
+    } else if (section == 4) {
+        return 2;
     }
+    return 0;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
-    if (section == 3) {
+    if (section == 1) {
+        return LOC(@"SEND_LYRICS_TO_MEDIA_CONTROLS_DESC");
+    } else if (section == 4) {
         return LOC(@"SEEK_TIME_FOOTER");
     }
-
     return nil;
 }
 
@@ -90,6 +94,34 @@
     }
 
     if (indexPath.section == 1) {
+        if (indexPath.row == 0) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"boolsCell"];
+
+            cell.textLabel.text = LOC(@"SEND_LYRICS_TO_MEDIA_CONTROLS");
+            cell.textLabel.adjustsFontSizeToFitWidth = YES;
+
+            ABCSwitch *switchControl = [[NSClassFromString(@"ABCSwitch") alloc] init];
+            switchControl.onTintColor = [UIColor colorWithRed:30.0/255.0 green:150.0/255.0 blue:245.0/255.0 alpha:1.0];
+            [switchControl addTarget:self action:@selector(toggleLrSwitch:) forControlEvents:UIControlEventValueChanged];
+            switchControl.tag = indexPath.row;
+            switchControl.on = [YTMUltimateDict[@"sendLyricsToMediaControls"] boolValue];
+            cell.accessoryView = switchControl;
+
+            return cell;
+        }
+
+        if (indexPath.row == 1) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"buttonCell"];
+
+            cell.textLabel.text = LOC(@"PURCHASE_LETTERPRESS");
+            cell.textLabel.adjustsFontSizeToFitWidth = YES;
+            cell.textLabel.textColor = self.view.tintColor;
+
+            return cell;
+        }
+    }
+
+    if (indexPath.section == 2) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"avCell"];
         cell.textLabel.text = LOC(@"AV_DEFAULT_MODE");
 
@@ -101,7 +133,7 @@
         return cell;
     }
 
-    if (indexPath.section == 2) {
+    if (indexPath.section == 3) {
         if (indexPath.row == 0) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"sbBoolCell"];
 
@@ -154,7 +186,7 @@
         }
     }
     
-    if (indexPath.section == 3) {
+    if (indexPath.section == 4) {
         if (indexPath.row == 0) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"seekButtonsCell"];
 
@@ -200,7 +232,21 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 1 && indexPath.row == 1) {
+        return YES;
+    }
     return NO;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+
+    if (indexPath.section == 1 && indexPath.row == 1) {
+        NSURL *url = [NSURL URLWithString:@"https://havoc.app/package/letterpress"];
+        if ([[UIApplication sharedApplication] canOpenURL:url]) {
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+        }
+    }
 }
 
 - (void)toggleSwitch:(UISwitch *)sender {
@@ -219,6 +265,14 @@
     NSMutableDictionary *YTMUltimateDict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:@"YTMUltimate"]];
 
     [YTMUltimateDict setObject:@([sender isOn]) forKey:data[@"key"]];
+    [defaults setObject:YTMUltimateDict forKey:@"YTMUltimate"];
+}
+
+- (void)toggleLrSwitch:(UISwitch *)sender {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *YTMUltimateDict = [NSMutableDictionary dictionaryWithDictionary:[defaults dictionaryForKey:@"YTMUltimate"]];
+
+    [YTMUltimateDict setObject:@([sender isOn]) forKey:@"sendLyricsToMediaControls"];
     [defaults setObject:YTMUltimateDict forKey:@"YTMUltimate"];
 }
 
