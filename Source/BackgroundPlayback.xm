@@ -31,7 +31,7 @@ static BOOL YTMU(NSString *key) {
 %end
 
 %hook YTIPlayabilityStatus
-- (BOOL)isPlayableInBackground{
+- (BOOL)isPlayableInBackground {
     return YTMU(@"YTMUltimateIsEnabled") && YTMU(@"backgroundPlayback") ? YES : %orig;
 }
 
