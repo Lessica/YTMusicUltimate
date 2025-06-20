@@ -2,6 +2,8 @@
 
 This is another maintained fork of [YTMusicUltimate](https://github.com/dayanch96/YTMusicUltimate).
 
+Since the original project is licensed under the GPL-3.0 License, this fork is also licensed under the same license.
+
 ## Additional Features
 
 - Send lyrics to Media Controls
