@@ -14,6 +14,7 @@
 #import "Headers/YTQueueItemsController.h"
 #import "Headers/MPNowPlayingInfoCenter+YTMusicUltimate.h"
 #import "Utils/LyricsParser.h"
+#import "Utils/LyricsManager.h"
 
 #define TAG "YTMusicUltimate+NowPlayingCenter : "
 
@@ -22,13 +23,21 @@ static BOOL YTMU(NSString *key) {
     return [YTMUltimateDict[key] boolValue];
 }
 
+static BOOL gIsEnabled = NO;
+static dispatch_queue_t gLyricsQueue = nil;
 static YTQueueController *gQueueController = nil;
 static NSString *gNowPlayingBrowseId = nil;
+static MPNowPlayingInfoCenter *gNowPlayingInfoCenter = nil;
+static NSDictionary *gLastNowPlayingInfo = nil;
+static NSDate *gLastNowPlayingInfoReportedAt = nil;
 
 %hook YTQueueController
 
 - (void)commonInit {
     %orig;
+    if (!gIsEnabled) {
+        return;
+    }
     gQueueController = self;
 #if DEBUG
     NSLog(@TAG "YTQueueController initialized : %@", self);
@@ -37,7 +46,10 @@ static NSString *gNowPlayingBrowseId = nil;
 }
 
 - (void)setNowPlayingIndex:(NSUInteger)index {
-    %orig(index);
+    %orig;
+    if (!gIsEnabled) {
+        return;
+    }
     [self ytmu_nowPlayingItemChanged];
 }
 
@@ -53,7 +65,10 @@ static NSString *gNowPlayingBrowseId = nil;
 %hook YTMPlayerTabViewController
 
 - (void)updateTabs:(NSArray<YTITabRenderer *> *)tabs {
-    %orig(tabs);
+    %orig;
+    if (!gIsEnabled) {
+        return;
+    }
     NSAssert([NSThread isMainThread], @"updateTabs should be called on the main thread");
 #if DEBUG
     NSLog(@TAG "YTMPlayerTabViewController updated tabs : %@", tabs);
@@ -61,7 +76,9 @@ static NSString *gNowPlayingBrowseId = nil;
     if (tabs.count == 3) {
         YTITabRenderer *lyricsTab = tabs[1];
         NSString *currentBrowseId = lyricsTab.endpoint.browseEndpoint.browseId;
-        gNowPlayingBrowseId = currentBrowseId;
+        dispatch_async(gLyricsQueue, ^{
+            gNowPlayingBrowseId = [currentBrowseId copy];
+        });
 #if DEBUG
         NSLog(@TAG "Current browse_id : %@", currentBrowseId);
 #endif
@@ -77,8 +94,14 @@ static NSString *gNowPlayingBrowseId = nil;
 #if DEBUG
     NSLog(@TAG "YTIBrowseResponse initialized with data : <%lu bytes>", (unsigned long)data.length);
 #endif
+    
+    if (!gIsEnabled || !data || !response) {
+        return response;
+    }
+
     LyricsParser *parser = [[LyricsParser alloc] initWithData:data];
     Lyrics *lyrics = [parser parseLyrics];
+    
     if (lyrics) {
         YTIResponseContext *context = [response responseContext];
         NSArray<YTIServiceTrackingParams *> *trackingParams = [context serviceTrackingParamsArray];
@@ -92,9 +115,38 @@ static NSString *gNowPlayingBrowseId = nil;
             }
             if (browseId) break;
         }
+
+        [[LyricsManager sharedManager] setLyrics:lyrics forKey:browseId];
 #if DEBUG
         NSLog(@TAG "Parsed lyrics : %@ <%lu lines> browse_id %@", lyrics, (unsigned long)lyrics.lines.count, browseId);
 #endif
+
+        dispatch_async(gLyricsQueue, ^{
+            if (![gNowPlayingBrowseId isEqualToString:browseId]) {
+                return;
+            }
+            
+            if (!gNowPlayingInfoCenter || !gLastNowPlayingInfo || !gLastNowPlayingInfoReportedAt) {
+                return;
+            }
+
+            NSDate *startedAt = gLastNowPlayingInfoReportedAt;
+            NSDate *endedAt = [NSDate date];
+            NSTimeInterval delta = MAX(0, [endedAt timeIntervalSinceDate:startedAt]);
+
+            NSMutableDictionary *newInfo = [gLastNowPlayingInfo mutableCopy];
+            NSTimeInterval elapsedPlaybackTime = [newInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] doubleValue];
+            NSTimeInterval playbackDuration = [newInfo[MPMediaItemPropertyPlaybackDuration] doubleValue];
+            NSTimeInterval playbackRate = newInfo[MPNowPlayingInfoPropertyPlaybackRate] ? [newInfo[MPNowPlayingInfoPropertyPlaybackRate] doubleValue] : 1.0;
+
+            NSTimeInterval newElapsedPlaybackTime = MIN(elapsedPlaybackTime + delta * playbackRate, playbackDuration);
+            newInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = @(newElapsedPlaybackTime);
+            newInfo[@"SkipSubtitleCombination"] = @YES;
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [gNowPlayingInfoCenter setNowPlayingInfo:newInfo];
+            });
+        });
     }
     return response;
 }
@@ -103,10 +155,11 @@ static NSString *gNowPlayingBrowseId = nil;
 
 %hook MPNowPlayingInfoCenter
 
+%property (nonatomic, strong) NSTimer *ytmu_updateTimer;
+
 - (void)setNowPlayingInfo:(NSDictionary *)info {
 
-    if (!YTMU(@"sendLyricsToMediaControls") ||
-        !info ||
+    if (!gIsEnabled || !info ||
         !info[MPMediaItemPropertyTitle] ||
         !info[MPMediaItemPropertyArtist]
     ) {
@@ -128,17 +181,112 @@ static NSString *gNowPlayingBrowseId = nil;
         newInfo[MPMediaItemPropertyArtist] = newSubtitle;
     }
 
+    dispatch_async(gLyricsQueue, ^{
+        gNowPlayingInfoCenter = self;
+        gLastNowPlayingInfo = newInfo;
+        gLastNowPlayingInfoReportedAt = [NSDate date];
+    });
+
+    NSTimeInterval elapsedPlaybackTime = [info[MPNowPlayingInfoPropertyElapsedPlaybackTime] doubleValue];
+    NSTimeInterval playbackDuration = [info[MPMediaItemPropertyPlaybackDuration] doubleValue];
+    NSTimeInterval playbackRate = info[MPNowPlayingInfoPropertyPlaybackRate] ? [info[MPNowPlayingInfoPropertyPlaybackRate] doubleValue] : 1.0;
+
+    __block NSMutableDictionary *nextInfo = nil;
+    __block NSTimeInterval nextInterval = 0;
+
+    dispatch_sync(gLyricsQueue, ^{
+        NSString *trackId = [gNowPlayingBrowseId copy];
+        Lyrics *lyrics = [[LyricsManager sharedManager] lyricsForKey:trackId];
+
+        NSString *currentLyricsText = @"";
+        NSUInteger nextLineStartTime = 0;
+
+        if (lyrics && lyrics.lines.count > 0) {
+            uint64_t currentMs = (uint64_t)(elapsedPlaybackTime * 1000);
+            NSArray<LyricLine *> *lines = lyrics.lines;
+            LyricLine *currentLine = nil;
+            for (NSInteger i = lines.count - 1; i >= 0; i--) {
+                LyricLine *line = lines[i];
+                if (line.startTime <= currentMs) {
+                    currentLine = line;
+                    break;
+                }
+            }
+            if (currentLine) {
+                currentLyricsText = currentLine.text;
+                NSUInteger idx = [lines indexOfObject:currentLine];
+                if (idx != NSNotFound && idx + 1 < lines.count) {
+                    nextLineStartTime = ((LyricLine *)lines[idx + 1]).startTime;
+                }
+            }
+            else if (lines.count > 0 && currentMs < ((LyricLine *)lines[0]).startTime) {
+                nextLineStartTime = ((LyricLine *)lines[0]).startTime;
+            }
+        }
+
+#if DEBUG
+        NSLog(@TAG "%@, next offset: %@", currentLyricsText.length > 0 ? currentLyricsText : @"(empty)", nextLineStartTime > 0 ? [@(nextLineStartTime) stringValue] : @"nil");
+#endif
+
+        if (nextLineStartTime > 0 && playbackRate > 1e-6) {
+            uint64_t currentMs = (uint64_t)(elapsedPlaybackTime * 1000);
+            NSInteger deltaMs = (NSInteger)nextLineStartTime - (NSInteger)currentMs;
+            NSTimeInterval interval = (NSTimeInterval)deltaMs / 1000.0 / playbackRate;
+            if (interval > 0 && elapsedPlaybackTime + interval <= playbackDuration) {
+                nextInfo = [newInfo mutableCopy];
+                nextInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = @((nextLineStartTime + 50 /* important! */) / 1000.0);
+                nextInterval = MAX(interval, 0.2 /* important! */);
+            }
+        }
+
+        if (currentLyricsText.length > 0) {
+            newInfo[MPMediaItemPropertyTitle] = currentLyricsText;
+        }
+    });
+
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+
+        if ([strongSelf ytmu_updateTimer]) {
+            [[strongSelf ytmu_updateTimer] invalidate];
+            strongSelf.ytmu_updateTimer = nil;
+        }
+
+        if (nextInfo && nextInterval > 0) {
+            strongSelf.ytmu_updateTimer = [NSTimer scheduledTimerWithTimeInterval:nextInterval target:self selector:@selector(ytmu_updateTimerFired:) userInfo:nextInfo repeats:NO];
+#if DEBUG
+            NSLog(@TAG "Scheduled update timer for %.3f seconds", nextInterval);
+#endif
+        }
+    });
+
     %orig(newInfo);
 }
 
 %new
 - (void)ytmu_updateTimerFired:(NSTimer *)timer {
-
-}
-
-%new
-- (void)reloadLyricsIfNeededWithTrackId:(NSString *)trackId userInfo:(NSDictionary *)userInfo {
-
+#if DEBUG
+    NSLog(@TAG "ytmu_updateTimerFired:");
+#endif
+    
+    NSDictionary *userInfo = timer.userInfo;
+    if (!userInfo) {
+        return;
+    }
+    
+    NSMutableDictionary *mUserInfo = [userInfo mutableCopy];
+    mUserInfo[@"SkipSubtitleCombination"] = @YES;
+    
+    [self setNowPlayingInfo:mUserInfo];
 }
 
 %end
+
+%ctor {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        gIsEnabled = YTMU(@"sendLyricsToMediaControls");
+        gLyricsQueue = dispatch_queue_create("com.ginsu.ytmusicultimate.now-playing", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+    });
+}

@@ -3,8 +3,46 @@
 #define TAG "YTMusicUltimate+LyricsParser : "
 
 @implementation LyricLine
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:self.text forKey:@"text"];
+    [coder encodeInt64:self.startTime forKey:@"startTime"];
+    [coder encodeInt64:self.endTime forKey:@"endTime"];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    if (self = [super init]) {
+        _text = [coder decodeObjectOfClass:[NSString class] forKey:@"text"];
+        _startTime = [coder decodeInt64ForKey:@"startTime"];
+        _endTime = [coder decodeInt64ForKey:@"endTime"];
+    }
+    return self;
+}
+
 @end
+
 @implementation Lyrics
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:self.lines forKey:@"lines"];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    if (self = [super init]) {
+        NSSet *classes = [NSSet setWithObjects:[NSArray class], [LyricLine class], nil];
+        _lines = [coder decodeObjectOfClasses:classes forKey:@"lines"];
+    }
+    return self;
+}
+
 @end
 
 @implementation LyricsParser {

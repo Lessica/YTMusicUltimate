@@ -2,13 +2,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface LyricLine : NSObject
+@interface LyricLine : NSObject <NSSecureCoding>
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, assign) uint64_t startTime;
 @property (nonatomic, assign) uint64_t endTime;
 @end
 
-@interface Lyrics : NSObject
+@interface Lyrics : NSObject <NSSecureCoding>
 @property (nonatomic, strong) NSArray<LyricLine *> *lines;
 @end
 
