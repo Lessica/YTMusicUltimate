@@ -128,7 +128,9 @@
 #endif
         return nil;
     }
+#if DEBUG
     int blockIndex = 0;
+#endif
     while (cursor < _length) {
         @autoreleasepool {
             if (cursor + 1 >= _length) break;
@@ -167,7 +169,9 @@
             NSLog(@TAG "Block %d: '%@' [%llu, %llu]", blockIndex, lyric, ts1, ts2);
 #endif
             cursor = blockEnd;
+#if DEBUG
             blockIndex++;
+#endif
         }
     }
     Lyrics *lyrics = [Lyrics new];
