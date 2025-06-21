@@ -97,16 +97,13 @@ static NSDate *gLastNowPlayingInfoReportedAt = nil;
 #if DEBUG
         NSLog(@TAG "Current browse_id : %@", currentBrowseId);
 #endif
-        /* Trigger the initial load of browse response */
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSArray<UITabBarItem *> *items = [self.view.tabBar items];
-                if (items.count == 3) {
-                    UITabBarItem *lyricsItem = items[1];
-                    [self.view.tabBar setSelectedItem:lyricsItem];
-                }
-            });
+        /* trigger the load of lyrics */
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSArray<UITabBarItem *> *items = [self.view.tabBar items];
+            if (items.count == 3) {
+                UITabBarItem *lyricsItem = items[1];
+                [self.view.tabBar setSelectedItem:lyricsItem];
+            }
         });
     }
 }
