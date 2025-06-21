@@ -7,7 +7,6 @@ Since the original project is licensed under the GPL-3.0 License, this fork is a
 ## Additional Features
 
 - Send lyrics to Media Controls
-- [TrollFools](https://github.com/Lessica/TrollFools) support
 
 ## Use it with Letterpress!
 
@@ -16,3 +15,5 @@ Since the original project is licensed under the GPL-3.0 License, this fork is a
 [<img width="150" src="https://docs.havoc.app/img/badges/get_square.svg" />][now-on-havoc]
 
 Letterpress is an awesome music visualizer “tweak” that based on TrollStore floating window technology.
+
+https://github.com/user-attachments/assets/5258b015-6e0c-496d-a9e6-47a01e00d5f1
