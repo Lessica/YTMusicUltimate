@@ -87,7 +87,7 @@ static BOOL YTMU(NSString *key) {
 %end
 
 %hook YTMMusicAppMetadata
-- (BOOL)isPremiumSubscriber{
+- (BOOL)isPremiumSubscriber {
     return YTMU(@"YTMUltimateIsEnabled") ? YES : %orig;
 }
 
@@ -95,7 +95,7 @@ static BOOL YTMU(NSString *key) {
     YTMU(@"YTMUltimateIsEnabled") ? %orig(YES) : %orig;
 }
 
-- (id)sidePanelPromo{
+- (id)sidePanelPromo {
     return YTMU(@"YTMUltimateIsEnabled") ? nil : %orig;
 }
 
@@ -123,7 +123,7 @@ static BOOL YTMU(NSString *key) {
 %end
 
 %hook YTIShowFullscreenInterstitialCommand
-- (BOOL)shouldThrottleInterstitial{
+- (BOOL)shouldThrottleInterstitial {
     return YTMU(@"YTMUltimateIsEnabled") ? YES : %orig;
 }
 
@@ -133,27 +133,27 @@ static BOOL YTMU(NSString *key) {
 %end
 
 %hook YTMAppResponder
-- (void)presentInterstitialPromoForEvent:(id)event{
+- (void)presentInterstitialPromoForEvent:(id)event {
     if (!YTMU(@"YTMUltimateIsEnabled")) %orig;
 }
 
-- (void)presentFullscreenPromoForEvent:(id)event{
+- (void)presentFullscreenPromoForEvent:(id)event {
     if (!YTMU(@"YTMUltimateIsEnabled")) %orig;
 }
 
-- (void)presentInterstitialGridPromoForEvent:(id)event{
+- (void)presentInterstitialGridPromoForEvent:(id)event {
     if (!YTMU(@"YTMUltimateIsEnabled")) %orig;
 }
 %end
 
 %hook YTPromosheetController
-- (void)presentPromosheetWithEvent:(id)event{
+- (void)presentPromosheetWithEvent:(id)event {
     if (!YTMU(@"YTMUltimateIsEnabled")) %orig;
 }
 %end
 
 %hook YTMCarPlayController
-- (BOOL)isPremiumSubscriber{
+- (BOOL)isPremiumSubscriber {
     return YTMU(@"YTMUltimateIsEnabled") ? YES : %orig;
 }
 
@@ -163,7 +163,7 @@ static BOOL YTMU(NSString *key) {
 %end
 
 %hook YTMYPCGetOfflineUpsellEndpointCommandHandler
-- (BOOL)isPremiumSubscriber{
+- (BOOL)isPremiumSubscriber {
     return YTMU(@"YTMUltimateIsEnabled") ? YES : %orig;
 }
 

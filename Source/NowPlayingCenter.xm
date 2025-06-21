@@ -1,3 +1,4 @@
+#include <Foundation/Foundation.h>
 @import Foundation;
 @import MediaPlayer;
 
@@ -22,6 +23,20 @@ static BOOL YTMU(NSString *key) {
     NSDictionary *YTMUltimateDict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"YTMUltimate"];
     return [YTMUltimateDict[key] boolValue];
 }
+
+@interface MDCTabBarView : UIView
+- (NSArray<UITabBarItem *> *)items;
+- (void)setSelectedItem:(UITabBarItem *)item;
+@end
+
+@interface YTMPlayerTabView : UIView
+- (MDCTabBarView *)tabBar;
+@end
+
+@interface YTMPlayerTabViewController : UIViewController
+@property (nonatomic, strong) YTMPlayerTabView *view;
+- (void)tabBarView:(MDCTabBarView *)view didSelectItem:(UITabBarItem *)item;
+@end
 
 static BOOL gIsEnabled = NO;
 static dispatch_queue_t gLyricsQueue = nil;
@@ -82,7 +97,28 @@ static NSDate *gLastNowPlayingInfoReportedAt = nil;
 #if DEBUG
         NSLog(@TAG "Current browse_id : %@", currentBrowseId);
 #endif
+        /* Trigger the initial load of browse response */
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSArray<UITabBarItem *> *items = [self.view.tabBar items];
+                if (items.count == 3) {
+                    UITabBarItem *lyricsItem = items[1];
+                    [self.view.tabBar setSelectedItem:lyricsItem];
+                }
+            });
+        });
     }
+}
+
+- (void)tabBarView:(MDCTabBarView *)view didSelectItem:(UITabBarItem *)item {
+    %orig;
+    if (!gIsEnabled) {
+        return;
+    }
+#if DEBUG
+    NSLog(@TAG "YTMPlayerTabViewController tabBarView : %@ didSelectItem : %@", view, item);
+#endif
 }
 
 %end
