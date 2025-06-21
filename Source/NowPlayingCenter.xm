@@ -1,8 +1,18 @@
 @import Foundation;
 @import MediaPlayer;
 
+#import "Headers/YTIBrowseResponse.h"
 #import "Headers/YTICommand.h"
+#import "Headers/YTIKeyValuePair.h"
+#import "Headers/YTIServiceTrackingParams.h"
+#import "Headers/YTIRenderer.h"
+#import "Headers/YTIResponseContext.h"
+#import "Headers/YTITabRenderer.h"
+#import "Headers/YTIWatchNextTabbedResultsRenderer.h"
+#import "Headers/YTQueueController.h"
 #import "Headers/YTQueueItem.h"
+#import "Headers/YTQueueItemsController.h"
+#import "Headers/MPNowPlayingInfoCenter+YTMusicUltimate.h"
 #import "Utils/LyricsParser.h"
 
 #define TAG "YTMusicUltimate+NowPlayingCenter : "
@@ -11,55 +21,6 @@ static BOOL YTMU(NSString *key) {
     NSDictionary *YTMUltimateDict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"YTMUltimate"];
     return [YTMUltimateDict[key] boolValue];
 }
-
-@interface YTQueueItemsController : NSObject
-@property (nonatomic, strong) NSArray *queueItems;
-@end
-
-@interface YTQueueController : NSObject
-@property (nonatomic, assign) NSUInteger nowPlayingIndex;
-@property (nonatomic, strong) YTQueueItemsController *queueItemsController;
-@property (nonatomic, strong) YTQueueItem *nowPlayingMusicQueueItem;
-- (void)ytmu_nowPlayingItemChanged;
-@end
-
-@interface MPNowPlayingInfoCenter (YTMusicUltimate)
-
-@property (nonatomic, strong) NSTimer *ytmu_updateTimer;
-
-- (void)ytmu_updateTimerFired:(NSTimer *)timer;
-- (void)reloadLyricsIfNeededWithTrackId:(NSString *)trackId userInfo:(NSDictionary *)userInfo;
-
-@end
-
-@interface YTIKeyValuePair : NSObject
-@property (nonatomic, copy) NSString *key;
-@property (nonatomic, copy) NSString *value;
-@end
-
-@interface YTIServiceTrackingParams : NSObject
-- (NSArray<YTIKeyValuePair *> *)paramsArray;
-@end
-
-@interface YTIResponseContext : NSObject
-- (NSArray<YTIServiceTrackingParams *> *)serviceTrackingParamsArray;
-@end
-
-@interface YTIBrowseResponse : NSObject
-- (YTIResponseContext *)responseContext;
-@end
-
-@interface YTITabRenderer : NSObject
-- (YTICommand *)endpoint;
-@end
-
-@interface YTIRenderer : NSObject
-- (NSString *)videoId;
-@end
-
-@interface YTIWatchNextTabbedResultsRenderer : NSObject
-@property (retain, nonatomic) YTIRenderer *videoMetadata;
-@end
 
 static YTQueueController *gQueueController = nil;
 static NSString *gNowPlayingBrowseId = nil;

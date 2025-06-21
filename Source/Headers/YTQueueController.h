@@ -1,10 +1,11 @@
-#import <Foundation/Foundation.h>
 #import "YTQueueItem.h"
-
+#import "YTQueueItemsController.h"
+#import <Foundation/Foundation.h>
 
 @interface YTQueueController : NSObject
-
-@property (readonly, nonatomic) YTQueueItem *nowPlayingMusicQueueItem;
-@property (nonatomic) double nowPlayingVideoMediaTime;
-
+@property (nonatomic, assign) NSUInteger nowPlayingIndex;
+@property (nonatomic, strong) YTQueueItemsController *queueItemsController;
+@property (nonatomic, strong) YTQueueItem *nowPlayingMusicQueueItem;
+@property (nonatomic) NSTimeInterval nowPlayingVideoMediaTime;
+- (void)ytmu_nowPlayingItemChanged;
 @end
