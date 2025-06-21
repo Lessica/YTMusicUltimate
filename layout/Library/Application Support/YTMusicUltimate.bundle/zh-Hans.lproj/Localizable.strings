@@ -1,15 +1,15 @@
 "SETTINGS" = "设置";
 "ENABLED" = "功能启用";
 "ENABLED_DESC" = "会员功能：去广告和背景播放等";
-"RESTART_FOOTER" = "重新启动App以应用设置更改";
+"RESTART_FOOTER" = "重新启动 App 以应用设置更改";
 
 "PREMIUM_SETTINGS" = "高级功能";
 "NO_ADS" = "去广告";
-"NO_ADS_DESC" = "去除App中的广告";
+"NO_ADS_DESC" = "去除 App 中的广告";
 "BACKGROUND_PLAYBACK" = "后台播放";
 "BACKGROUND_PLAYBACK_DESC" = "开启后台播放功能";
-"FORCE_PREMIUM" = "强制启用Premium功能";
-"FORCE_PREMIUM_DESC" = "强制启用高级会员功能\n此选项还禁用“选段”按钮";
+"FORCE_PREMIUM" = "强制启用 Premium 功能";
+"FORCE_PREMIUM_DESC" = "强制启用高级会员功能\n此选项还禁用 “选段” 按钮";
 
 "PLAYER_SETTINGS" = "播放器项";
 "DOWNLOAD_AUDIO" = "下载音频";
@@ -38,17 +38,17 @@
 "SB_BEHAVIOR" = "行为操作";
 "SB_SKIP" = "跳过";
 "SB_ASK" = "询问";
-"SB_NOTIF_DURATION" = "通知持续时间(秒)";
+"SB_NOTIF_DURATION" = "通知持续时间（秒）";
 
-"SEEK_BUTTONS" = "用“快进/快退”按钮替换“上一曲/下一曲”";
-"SEEK_TIME_FOOTER" = "选择跳过时间(秒)\n\n默认:\n快退 = 10秒\n快进 = 30秒\n\n长按按钮可跳到下一曲和上一曲";
+"SEEK_BUTTONS" = "用 “快进\/快退” 按钮替换 “上一曲\/下一曲”";
+"SEEK_TIME_FOOTER" = "选择跳过时间（秒）\n\n默认：\n快退 = 10 秒\n快进 = 30 秒\n\n长按按钮可跳到下一曲和上一曲";
 "DEFAULT" = "默认";
 
 "THEME_SETTINGS" = "主题选项";
 "OLED_DARK_THEME" = "深色主题";
-"OLED_DARK_THEME_DESC" = "启用OLED深色主题";
+"OLED_DARK_THEME_DESC" = "启用 OLED 深色主题";
 "OLED_DARK_KEYBOARD" = "深色键盘";
-"OLED_DARK_KEYBOARD_DESC" = "启用OLED深色键盘";
+"OLED_DARK_KEYBOARD_DESC" = "启用 OLED 深色键盘";
 "LOW_CONTRAST" = "低对比度";
 "LOW_CONTRAST_DESC" = "降低文字和按钮的对比度";
 
@@ -81,12 +81,12 @@
 "CLEAR_CACHE" = "清除缓存";
 
 "APPLY" = "应用";
-"APPLY_DESC" = "按下应用会关闭APP以应用变更";
+"APPLY_DESC" = "按下应用会关闭 App 以应用变更";
 
 "LINKS" = "相关链接";
 "TWITTER" = "推特关注%@";
 "TWITTER_DESC" = "获取更新消息";
-"DISCORD" = "加入Discord";
+"DISCORD" = "加入 Discord";
 "DISCORD_DESC" = "反馈问题和请求新功能";
 "SOURCE_CODE" = "开源代码";
 "SOURCE_CODE_DESC" = "查看开源代码";
@@ -95,16 +95,16 @@
 "WARNING" = "警告";
 "LOGIN_INFO" = "成功登录谷歌帐户后需要重新启动应用程序";
 "RETRY_LOGIN" = "登录权限已修复。\n\n请重试。";
-"APPLY_MESSAGE" = "此操作将关闭YouTube Music以应用变更，确定继续吗？";
+"APPLY_MESSAGE" = "此操作将关闭 YouTube Music 以应用变更，确定继续吗？";
 "CANCEL" = "取消";
 "YES" = "是";
-"REGIONAL_RESTRICTION" = "貌似YouTube Music在您所在的国家\/地区受到限制。\n\n请使用VPN访问YouTube Music。";
+"REGIONAL_RESTRICTION" = "貌似 YouTube Music 在您所在的国家\/地区受到限制。\n\n请使用 VPN 访问 YouTube Music。";
 
 "DONT_RUSH" = "不要急。请等待！";
 "DONT_RUSH_DESC" = "需要播放歌曲才能提取链接";
 "SELECT_ACTION" = "选择操作";
 "DOWNLOADING" = "下载中";
-"DOWNLOAD_PREMIUM" = "下载(需付费)";
+"DOWNLOAD_PREMIUM" = "下载（需付费）";
 "OOPS" = "哎呀\n出现了一些问题";
 "LINK_NOT_FOUND" = "未找到链接";
 "SAVED_TO_PHOTOS" = "已保存到照片";
@@ -117,8 +117,8 @@
 "EMPTY" = "下载的内容将显示在此处";
 "REMOVE_ALL" = "删除所有音频";
 "SHARE_ALL" = "分享所有音频";
-"PREPARING" = "准备中...";
-"DELETE_MESSAGE" = "你确定你要删除 %@ ？";
-"ALL_DOWNLOADS" = "所有下载的音频"; //keep it lowercase
+"PREPARING" = "准备中…";
+"DELETE_MESSAGE" = "你确定你要删除 %@？";
+"ALL_DOWNLOADS" = "所有下载的音频";
 "DELETE" = "删除";
 "RENAME" = "重命名";

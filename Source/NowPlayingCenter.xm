@@ -1,4 +1,3 @@
-#include <Foundation/Foundation.h>
 @import Foundation;
 @import MediaPlayer;
 
@@ -199,10 +198,6 @@ static NSDate *gLastNowPlayingInfoReportedAt = nil;
         %orig;
         return;
     }
-
-#if DEBUG
-    // NSLog(@TAG "Now playing info: %@", info);
-#endif
 
     NSString *title = info[MPMediaItemPropertyTitle];
     NSString *subtitle = info[MPMediaItemPropertyArtist];
